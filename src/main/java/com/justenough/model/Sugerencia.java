@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import com.justenough.model.enums.EstadoSugerencia;
 import com.justenough.model.enums.NivelConfianza;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,9 +14,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-// Lo que devuelve el motor de predicción: "el <fecha> producí <cantidadSugerida> de <producto>"
 @Entity
+@Table(name = "sugerencias")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Sugerencia {
 
     @Id
@@ -25,91 +35,25 @@ public class Sugerencia {
     @ManyToOne
     private Producto producto;
 
-    private LocalDate fecha;             // el día para el que se sugiere
-    private double cantidadSugerida;     // lo que dijo el sistema (no cambia nunca)
+    @Column(nullable = false)
+    private LocalDate fecha;
+
+    @Column(nullable = false)
+    private double cantidadSugerida;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private NivelConfianza nivelConfianza;
 
-    private double cantidadFinal;        // lo que se decidió producir (igual a la sugerida, salvo ajuste)
+    @Column(nullable = false)
+    private double cantidadFinal;
 
     @Enumerated(EnumType.STRING)
-    private EstadoSugerencia estado;
+    @Builder.Default
+    @Column(nullable = false)
+    private EstadoSugerencia estado = EstadoSugerencia.PENDIENTE;
 
-    private LocalDateTime fechaGeneracion;
-
-    public Sugerencia() {
-    }
-
-    public Sugerencia(Producto producto, LocalDate fecha, double cantidadSugerida, NivelConfianza nivelConfianza) {
-        this.producto = producto;
-        this.fecha = fecha;
-        this.cantidadSugerida = cantidadSugerida;
-        this.nivelConfianza = nivelConfianza;
-        this.cantidadFinal = cantidadSugerida;
-        this.estado = EstadoSugerencia.PENDIENTE;
-        this.fechaGeneracion = LocalDateTime.now();
-    }
-
-    // ===== Getters y Setters =====
-
-    public Long getId() {
-        return id;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public double getCantidadSugerida() {
-        return cantidadSugerida;
-    }
-
-    public void setCantidadSugerida(double cantidadSugerida) {
-        this.cantidadSugerida = cantidadSugerida;
-    }
-
-    public NivelConfianza getNivelConfianza() {
-        return nivelConfianza;
-    }
-
-    public void setNivelConfianza(NivelConfianza nivelConfianza) {
-        this.nivelConfianza = nivelConfianza;
-    }
-
-    public double getCantidadFinal() {
-        return cantidadFinal;
-    }
-
-    public void setCantidadFinal(double cantidadFinal) {
-        this.cantidadFinal = cantidadFinal;
-    }
-
-    public EstadoSugerencia getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoSugerencia estado) {
-        this.estado = estado;
-    }
-
-    public LocalDateTime getFechaGeneracion() {
-        return fechaGeneracion;
-    }
-
-    public void setFechaGeneracion(LocalDateTime fechaGeneracion) {
-        this.fechaGeneracion = fechaGeneracion;
-    }
+    @Builder.Default
+    @Column(nullable = false)
+    private LocalDateTime fechaGeneracion = LocalDateTime.now();
 }

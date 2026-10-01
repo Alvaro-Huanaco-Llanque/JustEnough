@@ -1,14 +1,23 @@
 package com.justenough.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-// Una fila = "1 unidad de <producto> lleva <cantidadPorUnidad> de <insumo>"
-// Ej: 1 medialuna lleva 0.04 kg de harina
 @Entity
+@Table(name = "receta_items")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RecetaItem {
 
     @Id
@@ -21,44 +30,6 @@ public class RecetaItem {
     @ManyToOne
     private Insumo insumo;
 
+    @Column(nullable = false)
     private double cantidadPorUnidad;
-
-    public RecetaItem() {
-    }
-
-    public RecetaItem(Producto producto, Insumo insumo, double cantidadPorUnidad) {
-        this.producto = producto;
-        this.insumo = insumo;
-        this.cantidadPorUnidad = cantidadPorUnidad;
-    }
-
-    // ===== Getters y Setters =====
-
-    public Long getId() {
-        return id;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public Insumo getInsumo() {
-        return insumo;
-    }
-
-    public void setInsumo(Insumo insumo) {
-        this.insumo = insumo;
-    }
-
-    public double getCantidadPorUnidad() {
-        return cantidadPorUnidad;
-    }
-
-    public void setCantidadPorUnidad(double cantidadPorUnidad) {
-        this.cantidadPorUnidad = cantidadPorUnidad;
-    }
 }

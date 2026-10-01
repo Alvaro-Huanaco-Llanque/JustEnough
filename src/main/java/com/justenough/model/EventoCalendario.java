@@ -3,7 +3,9 @@ package com.justenough.model;
 import java.time.LocalDate;
 
 import com.justenough.model.enums.TipoEvento;
+// ... resto de los imports
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,12 +13,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-
-// Clase que se guarda en MySQL. 
-// Entity = tabla, cada instancia = fila
-// Feriados y eventos que afectan la demanda
-@Entity 
+@Entity
+@Table(name = "eventos_calendario")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EventoCalendario {
 
     @Id
@@ -26,58 +34,13 @@ public class EventoCalendario {
     @ManyToOne
     private Comercio comercio;   // null = aplica a todos (ej: feriado nacional)
 
+    @Column(nullable = false)
     private LocalDate fecha;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TipoEvento tipo;
 
+    @Column(nullable = false)
     private String descripcion;
-
-    public EventoCalendario() {
-    }
-    // Constructor: 
-    public EventoCalendario(Comercio comercio, LocalDate fecha, TipoEvento tipo, String descripcion) {
-        this.comercio = comercio;
-        this.fecha = fecha;
-        this.tipo = tipo;
-        this.descripcion = descripcion;
-    }
-
-    // Getters y Setters:
-
-    public Long getId() {
-        return id;
-    }
-
-    public Comercio getComercio() {
-        return comercio;
-    }
-
-    public void setComercio(Comercio comercio) {
-        this.comercio = comercio;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public TipoEvento getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoEvento tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
 }

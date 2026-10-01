@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.justenough.model.enums.TipoAlerta;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,8 +12,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "alertas")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Alerta {
 
     @Id
@@ -26,75 +37,17 @@ public class Alerta {
     private Producto producto;   // puede ser null (ej: alerta de inactividad es de todo el comercio)
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TipoAlerta tipo;
 
+    @Column(nullable = false)
     private String mensaje;
-    private LocalDateTime fechaCreacion;
-    private boolean leida;
 
-    public Alerta() {
-    }
+    @Builder.Default
+    @Column(nullable = false)
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
 
-    public Alerta(Comercio comercio, Producto producto, TipoAlerta tipo, String mensaje) {
-        this.comercio = comercio;
-        this.producto = producto;
-        this.tipo = tipo;
-        this.mensaje = mensaje;
-        this.fechaCreacion = LocalDateTime.now();
-        this.leida = false;
-    }
-
-    // ===== Getters y Setters =====
-
-    public Long getId() {
-        return id;
-    }
-
-    public Comercio getComercio() {
-        return comercio;
-    }
-
-    public void setComercio(Comercio comercio) {
-        this.comercio = comercio;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public TipoAlerta getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoAlerta tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getMensaje() {
-        return mensaje;
-    }
-
-    public void setMensaje(String mensaje) {
-        this.mensaje = mensaje;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public boolean isLeida() {
-        return leida;
-    }
-
-    public void setLeida(boolean leida) {
-        this.leida = leida;
-    }
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean leida = false;
 }
