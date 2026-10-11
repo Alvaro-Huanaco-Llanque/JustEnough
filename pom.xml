@@ -87,6 +87,26 @@
     		<artifactId>dotenv-java</artifactId>
     		<version>3.0.0</version>
 		</dependency>
+		<!-- JJWT API -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>0.12.5</version>
+    </dependency>
+    <!-- JJWT Impl -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>0.12.5</version>
+        <scope>runtime</scope>
+    </dependency>
+    <!-- JJWT Jackson para procesar JSON -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>0.12.5</version>
+        <scope>runtime</scope>
+    </dependency>
 	</dependencies>
 
 	<build>

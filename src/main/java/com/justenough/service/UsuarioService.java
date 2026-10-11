@@ -21,17 +21,19 @@ public class UsuarioService {
 
     // Crear / Registrar un usuario nuevo con contraseña encriptada
     @Transactional
-    public Usuario registrarUsuario(Usuario usuario, String passwordPlana) {
-        // Validar si ya existe
-        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new RuntimeException("Ya existe un usuario registrado con ese email.");
-        }
-
-        // Encriptar la contraseña antes de asignarla al hash
-        usuario.setPasswordHash(passwordEncoder.encode(passwordPlana));
-        
-        return usuarioRepository.save(usuario);
+public Usuario registrarUsuarioDto(com.justenough.dto.UsuarioRegistroRequestDto dto, String passwordPlana) {
+    if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+        throw new RuntimeException("Ya existe un usuario registrado con ese email.");
     }
+
+    Usuario usuario = new Usuario();
+    usuario.setNombre(dto.getNombre());
+    usuario.setEmail(dto.getEmail());
+    usuario.setActivo(true);
+    usuario.setPasswordHash(passwordEncoder.encode(passwordPlana));
+    
+    return usuarioRepository.save(usuario);
+}
 
     // Listar todos los usuarios
     public List<Usuario> listarUsuarios() {
@@ -57,4 +59,22 @@ public class UsuarioService {
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
     }
+    
+    // Autenticar un usuario y devolver la entidad si las credenciales son correctas
+    public Usuario autenticar(String email, String passwordPlana) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Credenciales inválidas (email no encontrado)."));
+
+        if (!usuario.isActivo()) {
+            throw new RuntimeException("El usuario se encuentra desactivado.");
+        }
+
+        // Comparamos la contraseña ingresada con el hash almacenado
+        if (!passwordEncoder.matches(passwordPlana, usuario.getPasswordHash())) {
+            throw new RuntimeException("Credenciales inválidas (contraseña incorrecta).");
+        }
+
+        return usuario;
+    }
 }
+
