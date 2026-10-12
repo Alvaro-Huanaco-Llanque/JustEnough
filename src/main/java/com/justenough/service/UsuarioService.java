@@ -1,6 +1,7 @@
 package com.justenough.service;
 
 import com.justenough.model.Usuario;
+import com.justenough.model.enums.Rol;
 import com.justenough.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,7 +32,8 @@ public Usuario registrarUsuarioDto(com.justenough.dto.UsuarioRegistroRequestDto 
     usuario.setEmail(dto.getEmail());
     usuario.setActivo(true);
     usuario.setPasswordHash(passwordEncoder.encode(passwordPlana));
-    
+    usuario.setRol(Rol.DUENIO);
+
     return usuarioRepository.save(usuario);
 }
 
