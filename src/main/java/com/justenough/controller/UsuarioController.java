@@ -40,6 +40,13 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/perfil")
+    public ResponseEntity<?> obtenerPerfil(org.springframework.security.core.Authentication authentication) {
+        // El objeto 'authentication' es llenado automáticamente por tu filtro JWT si el token es válido
+        String email = authentication.getName(); 
+        return ResponseEntity.ok("Acceso autorizado para el usuario: " + email);
+    }
+
     // Registrar un nuevo usuario usando el DTO de request
     @PostMapping("/registro")
     public ResponseEntity<UsuarioResponseDto> registrarUsuario(@Valid @RequestBody UsuarioRegistroRequestDto requestDto) {

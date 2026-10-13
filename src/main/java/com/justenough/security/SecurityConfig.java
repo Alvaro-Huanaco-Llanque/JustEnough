@@ -1,5 +1,6 @@
 package com.justenough.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,25 +14,25 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+private JwtRequestFilter jwtRequestFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Deshabilitamos CSRF ya que usamos una API REST con JWT
             .csrf(csrf -> csrf.disable())
-            // Habilitamos CORS para que permita la conexión con React
             .cors(cors -> {})
-            // Configuramos la política de sesiones como Stateless (sin estado)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Definimos los permisos de las rutas
             .authorizeHttpRequests(auth -> auth
-                // Permitimos acceso público al registro, login y listado de usuarios (podes ajustarlo)
-                .requestMatchers("/api/usuarios/registro", "/api/usuarios/login", "/api/usuarios/**").permitAll()
-                // Cualquier otra petición requiere autenticación
+                .requestMatchers("/api/usuarios/registro", "/api/usuarios/login").permitAll()
                 .anyRequest().authenticated()
-            );
+            )
+            // Agregamos el filtro JWT correctamente con la sintaxis moderna
+            .addFilterBefore(jwtRequestFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

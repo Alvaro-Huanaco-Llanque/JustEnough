@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UsuarioService {
+public class UsuarioService implements org.springframework.security.core.userdetails.UserDetailsService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -78,5 +78,19 @@ public Usuario registrarUsuarioDto(com.justenough.dto.UsuarioRegistroRequestDto 
 
         return usuario;
     }
+
+    @Override
+    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String email) throws org.springframework.security.core.userdetails.UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("Usuario no encontrado con email: " + email));
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(usuario.getEmail())
+                .password(usuario.getPasswordHash())
+                .roles(usuario.getRol().name())
+                .disabled(!usuario.isActivo())
+                .build();
+    }
+
 }
 
