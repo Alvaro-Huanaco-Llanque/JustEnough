@@ -1,6 +1,6 @@
 package com.justenough.model;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import com.justenough.model.enums.UnidadMedida;
 
@@ -44,9 +44,6 @@ public class Insumo {
     @Builder.Default
     private double stockActual = 0.0;
 
-    @Column(nullable = false)
-    private BigDecimal costoUnitario;   // BigDecimal para plata: evita errores de redondeo
-
-    @Column(nullable = false)
-    private int vidaUtilDias;
+    @Column(name = "fecha_compra", nullable = false)
+    private LocalDate fechaCompra; 
 }

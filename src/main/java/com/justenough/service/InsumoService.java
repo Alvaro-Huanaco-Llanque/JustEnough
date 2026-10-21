@@ -15,23 +15,30 @@ public class InsumoService {
     @Autowired
     private InsumoRepository insumoRepository;
 
-    // Registrar o actualizar un insumo
     @Transactional
     public Insumo guardarInsumo(Insumo insumo) {
+        // Lógica de renombramiento automático para insumos duplicados
+        String nombreBase = insumo.getNombre().trim();
+        String nombreFinal = nombreBase;
+        int contador = 2;
+
+        while (insumoRepository.findByNombre(nombreFinal).isPresent()) {
+            nombreFinal = nombreBase + " " + contador;
+            contador++;
+        }
+        
+        insumo.setNombre(nombreFinal);
         return insumoRepository.save(insumo);
     }
 
-    // Listar todos los insumos
     public List<Insumo> listarInsumos() {
         return insumoRepository.findAll();
     }
 
-    // Buscar insumo por ID
     public Optional<Insumo> buscarPorId(Long id) {
         return insumoRepository.findById(id);
     }
 
-    // Método específico para actualizar el stock actual de un insumo
     @Transactional
     public Insumo actualizarStock(Long id, double nuevoStock) {
         Insumo insumo = insumoRepository.findById(id)
@@ -41,7 +48,6 @@ public class InsumoService {
         return insumoRepository.save(insumo);
     }
 
-    // Eliminar un insumo
     @Transactional
     public void eliminarInsumo(Long id) {
         if (!insumoRepository.existsById(id)) {

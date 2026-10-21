@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RecetaItemRepository extends JpaRepository<RecetaItem, Long> {
+    void deleteByProductoId(Long productoId);
 }

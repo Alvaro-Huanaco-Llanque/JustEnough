@@ -31,5 +31,5 @@ public class RecetaItem {
     private Insumo insumo;
 
     @Column(nullable = false)
-    private double cantidadPorUnidad;
+    private double cantidad;
 }

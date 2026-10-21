@@ -1,18 +1,13 @@
 package com.justenough.controller;
 
 import com.justenough.dto.ProductoRequestDto;
-import com.justenough.model.Insumo;
 import com.justenough.model.Producto;
-import com.justenough.model.RecetaItem;
-import com.justenough.repository.InsumoRepository;
-import com.justenough.repository.ProductoRepository;
-import com.justenough.repository.RecetaItemRepository;
+import com.justenough.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -20,54 +15,33 @@ import java.util.Optional;
 public class ProductoController {
 
     @Autowired
-    private ProductoRepository productoRepository;
-
-    @Autowired
-    private InsumoRepository insumoRepository;
-
-    @Autowired
-    private RecetaItemRepository recetaItemRepository;
+    private ProductoService productoService;
 
     @GetMapping
     public List<Producto> listar() {
-        return productoRepository.findAll();
+        return productoService.listar();
     }
 
-@PostMapping
-    public ResponseEntity<Producto> guardar(@RequestBody ProductoRequestDto dto) {
-        // 1. Crear y guardar el Producto mapeando todos los campos del DTO
-        Producto producto = new Producto();
-        producto.setNombre(dto.getNombre());
-        producto.setUnidadMedida(dto.getUnidadMedida());
-        producto.setVidaUtilDias(dto.getVidaUtilDias());
-        producto.setPriorizado(dto.isPriorizado());
-        producto.setStock(dto.getStock()); // <-- ¡Acá estaba el faltante clave!
-        producto.setActivo(dto.isActivo());
-        
-        Producto productoGuardado = productoRepository.save(producto);
-
-        // 2. Guardar la receta asociada si trae insumos
-        if (dto.getInsumos() != null && !dto.getInsumos().isEmpty()) {
-            for (ProductoRequestDto.RecetaDto recetaDto : dto.getInsumos()) {
-                // Lógica de receta...
-            }
-        }
-
-        return ResponseEntity.ok(productoGuardado);
-    }
-
-@DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        if (!productoRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+    @PostMapping
+    public ResponseEntity<?> guardar(@RequestBody ProductoRequestDto dto) {
         try {
-            // Si tienes elementos en receta asociados a este producto, los borramos primero para evitar conflicto de FK
-            // (Si ya tienes un método deleteByProductoId en tu RecetaItemRepository, puedes descomentar la siguiente línea)
-            // recetaItemRepository.deleteByProductoId(id);
+            Producto productoGuardado = productoService.guardar(dto);
+            return ResponseEntity.ok(productoGuardado);
+        } catch (IllegalArgumentException e) {
+            // Si no hay stock, devolvemos un error 400 con el mensaje exacto
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("{\"message\": \"Error interno del servidor\"}");
+        }
+    }
 
-            productoRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        try {
+            productoService.eliminar(id);
             return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             System.out.println("Error al eliminar el producto: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
