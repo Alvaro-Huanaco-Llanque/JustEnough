@@ -31,39 +31,31 @@ public class ProductoService {
 
     @Transactional
     public Producto guardar(ProductoRequestDto dto) {
-        // 1. Validar stock de TODOS los insumos antes de guardar nada
         if (dto.getInsumos() != null && !dto.getInsumos().isEmpty()) {
             for (ProductoRequestDto.RecetaDto recetaDto : dto.getInsumos()) {
                 Insumo insumo = insumoRepository.findByNombre(recetaDto.getIngrediente())
-                        .orElseThrow(() -> new IllegalArgumentException("El insumo '" + recetaDto.getIngrediente() + "' no existe en la base de datos."));
-
+                        .orElseThrow(() -> new IllegalArgumentException("El insumo '" + recetaDto.getIngrediente() + "' no existe."));
                 if (insumo.getStockActual() < recetaDto.getCantidad()) {
-                    throw new IllegalArgumentException("No hay suficiente stock de " + insumo.getNombre() + ". Stock actual: " + insumo.getStockActual());
+                    throw new IllegalArgumentException("No hay suficiente stock de " + insumo.getNombre());
                 }
             }
         }
 
-        // 2. Crear y guardar el Producto
         Producto producto = new Producto();
         producto.setNombre(dto.getNombre());
         producto.setUnidadMedida(dto.getUnidadMedida());
-        producto.setVidaUtilDias(dto.getVidaUtilDias());
         producto.setPriorizado(dto.isPriorizado());
         producto.setStock(dto.getStock());
         producto.setActivo(dto.isActivo());
         
         Producto productoGuardado = productoRepository.save(producto);
 
-        // 3. Descontar el stock de los insumos y guardar la receta
         if (dto.getInsumos() != null && !dto.getInsumos().isEmpty()) {
             for (ProductoRequestDto.RecetaDto recetaDto : dto.getInsumos()) {
                 Insumo insumo = insumoRepository.findByNombre(recetaDto.getIngrediente()).get();
-                
-                // Restamos el stock utilizado
                 insumo.setStockActual(insumo.getStockActual() - recetaDto.getCantidad());
                 insumoRepository.save(insumo);
 
-                // Guardamos el registro de la receta
                 RecetaItem recetaItem = new RecetaItem();
                 recetaItem.setProducto(productoGuardado);
                 recetaItem.setInsumo(insumo);
@@ -71,7 +63,6 @@ public class ProductoService {
                 recetaItemRepository.save(recetaItem);
             }
         }
-
         return productoGuardado;
     }
 
@@ -83,5 +74,13 @@ public class ProductoService {
         // Eliminamos la receta primero para evitar errores de llave foránea
         recetaItemRepository.deleteByProductoId(id);
         productoRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Producto actualizarStock(Long id, double nuevoStock) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + id));
+        producto.setStock(nuevoStock);
+        return productoRepository.save(producto);
     }
 }

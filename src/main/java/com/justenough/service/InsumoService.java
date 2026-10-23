@@ -17,11 +17,11 @@ public class InsumoService {
 
     @Transactional
     public Insumo guardarInsumo(Insumo insumo) {
-        // Lógica de renombramiento automático para insumos duplicados
         String nombreBase = insumo.getNombre().trim();
         String nombreFinal = nombreBase;
         int contador = 2;
 
+        // Si existe, probamos con 2, 3, 4... hasta encontrar un nombre libre
         while (insumoRepository.findByNombre(nombreFinal).isPresent()) {
             nombreFinal = nombreBase + " " + contador;
             contador++;

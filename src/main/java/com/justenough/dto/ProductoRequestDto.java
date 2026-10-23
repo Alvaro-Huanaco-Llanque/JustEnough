@@ -8,10 +8,9 @@ import java.util.List;
 public class ProductoRequestDto {
     private String nombre;
     private UnidadMedida unidadMedida;
-    private int vidaUtilDias;
     private boolean priorizado;
-    private double stock;     // <-- ¡Agregado aquí!
-    private boolean activo;   // <-- ¡Y agregado aquí!
+    private double stock;
+    private boolean activo;
     private List<RecetaDto> insumos;
 
     @Data

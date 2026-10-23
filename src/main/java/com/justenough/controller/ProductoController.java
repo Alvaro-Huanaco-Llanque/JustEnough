@@ -47,4 +47,14 @@ public class ProductoController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PutMapping("/{id}/stock")
+    public ResponseEntity<?> actualizarStock(@PathVariable Long id, @RequestParam double nuevoStock) {
+        try {
+            Producto actualizado = productoService.actualizarStock(id, nuevoStock);
+            return ResponseEntity.ok(actualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
+    }
 }

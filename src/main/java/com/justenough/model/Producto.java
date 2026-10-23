@@ -3,6 +3,7 @@ package com.justenough.model;
 import com.justenough.model.enums.UnidadMedida;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,8 +12,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Producto {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,17 +29,18 @@ public class Producto {
     private UnidadMedida unidadMedida;
 
     @Column(nullable = false)
-    private int vidaUtilDias;
-
-    @Column(nullable = false)
+    @Builder.Default
     private boolean priorizado = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private double stockMinimo = 0.0;
 
     @Column(nullable = false)
-    private double stock = 0.0; // <-- Asegúrate de que esté declarado exactamente así
+    @Builder.Default
+    private double stock = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean activo = true;
 }
