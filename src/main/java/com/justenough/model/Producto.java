@@ -43,4 +43,8 @@ public class Producto {
     @Column(nullable = false)
     @Builder.Default
     private boolean activo = true;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private double precioVenta = 0.0;
 }

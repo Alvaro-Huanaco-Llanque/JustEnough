@@ -83,4 +83,12 @@ public class ProductoService {
         producto.setStock(nuevoStock);
         return productoRepository.save(producto);
     }
+
+    @Transactional
+    public Producto actualizarPrecio(Long id, double nuevoPrecio) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + id));
+        producto.setPrecioVenta(nuevoPrecio);
+        return productoRepository.save(producto);
+    }
 }

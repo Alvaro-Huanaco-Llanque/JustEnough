@@ -57,4 +57,14 @@ public class ProductoController {
             return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
         }
     }
+
+    @PutMapping("/{id}/precio")
+    public ResponseEntity<?> actualizarPrecio(@PathVariable Long id, @RequestParam double nuevoPrecio) {
+        try {
+            Producto actualizado = productoService.actualizarPrecio(id, nuevoPrecio);
+            return ResponseEntity.ok(actualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
+    }
 }
