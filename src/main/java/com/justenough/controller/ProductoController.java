@@ -3,12 +3,16 @@ package com.justenough.controller;
 import com.justenough.dto.ProductoRequestDto;
 import com.justenough.model.Producto;
 import com.justenough.service.ProductoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+// Productos del catálogo del comercio logueado. Los errores de validación y de negocio
+// los responde el GlobalExceptionHandler con {"message": ...}.
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoController {
@@ -21,44 +25,35 @@ public class ProductoController {
         return productoService.listar();
     }
 
+    // Alta de un producto en el catálogo
     @PostMapping
-    public ResponseEntity<?> guardar(@RequestBody ProductoRequestDto dto) {
-        try {
-            Producto productoGuardado = productoService.guardar(dto);
-            return ResponseEntity.ok(productoGuardado);
-        } catch (IllegalArgumentException e) {
-            // Si no hay stock, devolvemos un error 400 con el mensaje exacto
-            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
-        }
+    public Producto guardar(@Valid @RequestBody ProductoRequestDto dto) {
+        return productoService.guardar(dto);
+    }
+
+    // Edición de un producto del catálogo (nombre, modalidad, precios, etc.)
+    @PutMapping("/{id}")
+    public Producto actualizar(@PathVariable Long id, @Valid @RequestBody ProductoRequestDto dto) {
+        return productoService.actualizar(id, dto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        try {
-            productoService.eliminar(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Map<String, Object>> eliminar(@PathVariable Long id) {
+        boolean borrado = productoService.eliminar(id);
+        String mensaje = borrado
+                ? "Producto eliminado."
+                : "El producto tiene datos cargados (ventas, producción o desechos), así que se desactivó en lugar de borrarse.";
+        return ResponseEntity.ok(Map.of("borrado", borrado, "message", mensaje));
     }
 
+    // Ajuste manual del conteo desde Inventario
     @PutMapping("/{id}/stock")
-    public ResponseEntity<?> actualizarStock(@PathVariable Long id, @RequestParam double nuevoStock) {
-        try {
-            Producto actualizado = productoService.actualizarStock(id, nuevoStock);
-            return ResponseEntity.ok(actualizado);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
-        }
+    public Producto actualizarStock(@PathVariable Long id, @RequestParam double nuevoStock) {
+        return productoService.actualizarStock(id, nuevoStock);
     }
 
     @PutMapping("/{id}/precio")
-    public ResponseEntity<?> actualizarPrecio(@PathVariable Long id, @RequestParam double nuevoPrecio) {
-        try {
-            Producto actualizado = productoService.actualizarPrecio(id, nuevoPrecio);
-            return ResponseEntity.ok(actualizado);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
-        }
+    public Producto actualizarPrecio(@PathVariable Long id, @RequestParam double nuevoPrecio) {
+        return productoService.actualizarPrecio(id, nuevoPrecio);
     }
 }

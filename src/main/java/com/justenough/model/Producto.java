@@ -1,5 +1,6 @@
 package com.justenough.model;
 
+import com.justenough.model.enums.ModalidadProducto;
 import com.justenough.model.enums.UnidadMedida;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,4 +48,15 @@ public class Producto {
     @Column(nullable = false)
     @Builder.Default
     private double precioVenta = 0.0;
+
+    // El default en la base hace que los productos que ya existían queden como PRODUCIDO
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) not null default 'PRODUCIDO'")
+    @Builder.Default
+    private ModalidadProducto modalidad = ModalidadProducto.PRODUCIDO;
+
+    // Lo que le cuesta al comercio cada unidad: el precio de compra o el costo de producirla
+    @Column(nullable = false)
+    @Builder.Default
+    private double costoUnitario = 0.0;
 }

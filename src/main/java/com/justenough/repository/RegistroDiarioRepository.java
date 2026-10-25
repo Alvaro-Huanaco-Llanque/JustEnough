@@ -15,4 +15,8 @@ public interface RegistroDiarioRepository extends JpaRepository<RegistroDiario, 
     List<RegistroDiario> findByProductoComercioId(Long comercioId);
 
     Optional<RegistroDiario> findByIdAndProductoComercioId(Long id, Long comercioId);
+
+    List<RegistroDiario> findByProductoComercioIdAndFecha(Long comercioId, LocalDate fecha);
+
+    boolean existsByProductoId(Long productoId);
 }

@@ -3,8 +3,12 @@ package com.justenough.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.justenough.model.enums.ModalidadProducto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,6 +45,13 @@ public class RegistroDiario {
     private double cantidadVendida;
 
     private Double cantidadDesperdiciada; // Permite null si no se cargó
+
+    // Copia de cómo ingresó y cuánto costó ese día. Se guarda acá porque en el catálogo
+    // pueden cambiar después, y para calcular el impacto hay que usar los valores de ese día.
+    @Enumerated(EnumType.STRING)
+    private ModalidadProducto modalidad;
+
+    private Double costoUnitario;
 
     @ManyToOne
     private Usuario cargadoPor;

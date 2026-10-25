@@ -8,6 +8,7 @@ import com.justenough.model.RecetaItem;
 import com.justenough.repository.InsumoRepository;
 import com.justenough.repository.ProductoRepository;
 import com.justenough.repository.RecetaItemRepository;
+import com.justenough.repository.RegistroDiarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,9 @@ public class ProductoService {
 
     @Autowired
     private RecetaItemRepository recetaItemRepository;
+
+    @Autowired
+    private RegistroDiarioRepository registroDiarioRepository;
 
     @Autowired
     private SesionService sesionService;
@@ -50,11 +54,8 @@ public class ProductoService {
 
         Producto producto = new Producto();
         producto.setComercio(comercio);
-        producto.setNombre(dto.getNombre());
-        producto.setUnidadMedida(dto.getUnidadMedida());
-        producto.setPriorizado(dto.isPriorizado());
         producto.setStock(dto.getStock());
-        producto.setActivo(dto.isActivo());
+        copiarDatosDeCatalogo(dto, producto);
 
         Producto productoGuardado = productoRepository.save(producto);
 
@@ -74,16 +75,36 @@ public class ProductoService {
         return productoGuardado;
     }
 
+    // Edita los datos del catálogo. El stock no se toca acá: se ajusta desde Inventario.
     @Transactional
-    public void eliminar(Long id) {
+    public Producto actualizar(Long id, ProductoRequestDto dto) {
         Producto producto = buscarPropio(id);
+        copiarDatosDeCatalogo(dto, producto);
+        return productoRepository.save(producto);
+    }
+
+    // Si el producto ya tiene ventas, producción o desechos cargados no se puede borrar
+    // (se perdería el historial que usa la predicción): en ese caso se desactiva.
+    // Devuelve true si se borró y false si solo se desactivó.
+    @Transactional
+    public boolean eliminar(Long id) {
+        Producto producto = buscarPropio(id);
+        if (registroDiarioRepository.existsByProductoId(producto.getId())) {
+            producto.setActivo(false);
+            productoRepository.save(producto);
+            return false;
+        }
         // Eliminamos la receta primero para evitar errores de llave foránea
         recetaItemRepository.deleteByProductoId(producto.getId());
         productoRepository.delete(producto);
+        return true;
     }
 
     @Transactional
     public Producto actualizarStock(Long id, double nuevoStock) {
+        if (nuevoStock < 0) {
+            throw new IllegalArgumentException("El stock no puede ser negativo");
+        }
         Producto producto = buscarPropio(id);
         producto.setStock(nuevoStock);
         return productoRepository.save(producto);
@@ -94,6 +115,17 @@ public class ProductoService {
         Producto producto = buscarPropio(id);
         producto.setPrecioVenta(nuevoPrecio);
         return productoRepository.save(producto);
+    }
+
+    private void copiarDatosDeCatalogo(ProductoRequestDto dto, Producto producto) {
+        producto.setNombre(dto.getNombre().trim());
+        producto.setUnidadMedida(dto.getUnidadMedida());
+        producto.setModalidad(dto.getModalidad());
+        producto.setPrecioVenta(dto.getPrecioVenta());
+        producto.setCostoUnitario(dto.getCostoUnitario());
+        producto.setStockMinimo(dto.getStockMinimo());
+        producto.setPriorizado(dto.isPriorizado());
+        producto.setActivo(dto.isActivo());
     }
 
     // Busca el producto solo dentro del comercio del usuario: los de otros comercios "no existen"

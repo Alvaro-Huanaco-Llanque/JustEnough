@@ -1,5 +1,6 @@
 package com.justenough.service;
 
+import com.justenough.dto.IngresosBatchRequestDto;
 import com.justenough.dto.VentasBatchRequestDto;
 import com.justenough.exception.NegocioException;
 import com.justenough.model.Producto;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +32,56 @@ public class RegistroDiarioService {
 
     public List<RegistroDiario> listar() {
         return registroDiarioRepository.findByProductoComercioId(sesionService.getComercioActual().getId());
+    }
+
+    public List<RegistroDiario> listarPorFecha(LocalDate fecha) {
+        return registroDiarioRepository.findByProductoComercioIdAndFecha(sesionService.getComercioActual().getId(), fecha);
+    }
+
+    // Guarda cuánto se produjo o compró de cada producto en un día.
+    // La cantidad es el total del día (no se suma): si se corrige un día ya cargado, el stock
+    // se ajusta por la diferencia entre lo nuevo y lo que había.
+    @Transactional
+    public void registrarIngresosBatch(IngresosBatchRequestDto request) {
+        Usuario usuario = sesionService.getUsuarioActual();
+        Long comercioId = sesionService.getComercioActual().getId();
+
+        for (Map.Entry<Long, Double> entry : request.getIngresos().entrySet()) {
+            Long productoId = entry.getKey();
+            double cantidadNueva = entry.getValue() == null ? 0.0 : entry.getValue();
+            if (cantidadNueva < 0) {
+                throw new IllegalArgumentException("La cantidad no puede ser negativa.");
+            }
+
+            Producto producto = productoRepository.findByIdAndComercioId(productoId, comercioId)
+                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + productoId));
+
+            Optional<RegistroDiario> existente = registroDiarioRepository.findByProductoIdAndFecha(productoId, request.getFecha());
+            double cantidadAnterior = existente.map(RegistroDiario::getCantidadProducida).orElse(0.0);
+            // Nada que guardar: no había carga ese día y tampoco se cargó ahora
+            if (existente.isEmpty() && cantidadNueva == 0) continue;
+
+            double diferencia = cantidadNueva - cantidadAnterior;
+            if (producto.getStock() + diferencia < 0) {
+                throw new IllegalArgumentException("No se puede bajar el ingreso de " + producto.getNombre()
+                        + " a " + cantidadNueva + ": parte de ese stock ya se vendió o descartó.");
+            }
+            producto.setStock(producto.getStock() + diferencia);
+            productoRepository.save(producto);
+
+            RegistroDiario registro = existente.orElse(RegistroDiario.builder()
+                    .producto(producto)
+                    .fecha(request.getFecha())
+                    .cantidadProducida(0.0)
+                    .cantidadVendida(0.0)
+                    .cantidadDesperdiciada(0.0)
+                    .build());
+            registro.setCantidadProducida(cantidadNueva);
+            registro.setModalidad(producto.getModalidad());
+            registro.setCostoUnitario(producto.getCostoUnitario());
+            registro.setCargadoPor(usuario);
+            registroDiarioRepository.save(registro);
+        }
     }
 
     public Optional<RegistroDiario> buscarPorId(Long id) {
