@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/insumos")
-@CrossOrigin(origins = "*")
 public class InsumoController {
 
     @Autowired
@@ -39,22 +38,13 @@ public class InsumoController {
     // Actualizar el stock de un insumo (PUT /api/insumos/{id}/stock?nuevoStock=50)
     @PutMapping("/{id}/stock")
     public ResponseEntity<Insumo> actualizarStock(@PathVariable Long id, @RequestParam double nuevoStock) {
-        try {
-            Insumo actualizado = insumoService.actualizarStock(id, nuevoStock);
-            return ResponseEntity.ok(actualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(insumoService.actualizarStock(id, nuevoStock));
     }
 
     // Eliminar un insumo (DELETE /api/insumos/{id})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarInsumo(@PathVariable Long id) {
-        try {
-            insumoService.eliminarInsumo(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        insumoService.eliminarInsumo(id);
+        return ResponseEntity.noContent().build();
     }
 }

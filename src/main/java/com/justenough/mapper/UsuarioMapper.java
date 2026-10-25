@@ -1,6 +1,7 @@
 package com.justenough.mapper;
 
 import com.justenough.dto.UsuarioResponseDto;
+import com.justenough.model.Comercio;
 import com.justenough.model.Usuario;
 import org.springframework.stereotype.Component;
 
@@ -12,25 +13,22 @@ public class UsuarioMapper {
         if (usuario == null) {
             return null;
         }
-        
+
+        Comercio comercio = usuario.getComercio();
+        UsuarioResponseDto.ComercioResumenDto comercioDto = comercio == null ? null
+                : UsuarioResponseDto.ComercioResumenDto.builder()
+                        .id(comercio.getId())
+                        .nombre(comercio.getNombre())
+                        .rubro(comercio.getRubro())
+                        .build();
+
         return UsuarioResponseDto.builder()
                 .id(usuario.getId())
                 .nombre(usuario.getNombre())
                 .email(usuario.getEmail())
+                .rol(usuario.getRol())
                 .activo(usuario.isActivo())
+                .comercio(comercioDto)
                 .build();
-    }
-
-    // Convierte del DTO de registro a Entidad base
-    public Usuario toEntity(com.justenough.dto.UsuarioRegistroRequestDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Usuario usuario = new Usuario();
-        usuario.setNombre(dto.getNombre());
-        usuario.setEmail(dto.getEmail());
-        usuario.setActivo(true);
-        return usuario;
     }
 }

@@ -43,6 +43,10 @@ public class Comercio {
     @Column(nullable = false)
     private String provincia;
 
+    private String direccion;
+
+    private String telefono;
+
     @Builder.Default
     @Column(nullable = false)
     private LocalDate fechaAlta = LocalDate.now();

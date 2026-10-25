@@ -1,5 +1,8 @@
 package com.justenough.model;
 
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.justenough.model.enums.Rol;
 
 import jakarta.persistence.Column;
@@ -34,6 +37,7 @@ public class Usuario {
     @Column(unique = true, nullable = false)   // no puede haber dos usuarios con el mismo email
     private String email;
 
+    @JsonIgnore   // nunca se envía al frontend, aunque el usuario venga anidado en otra entidad
     @Column(nullable = false)
     private String passwordHash;   // NUNCA la contraseña real: se guarda encriptada
 
@@ -47,4 +51,16 @@ public class Usuario {
     @Builder.Default
     @Column(nullable = false)
     private boolean activo = true;
+
+    // El default 1 en la base hace que las cuentas creadas antes de existir la verificación queden verificadas.
+    // Las cuentas nuevas se crean con false desde UsuarioService.
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "bit(1) not null default 1")
+    private boolean emailVerificado = true;
+
+    @JsonIgnore
+    private String tokenVerificacion;
+
+    @JsonIgnore
+    private LocalDateTime tokenVerificacionExpira;
 }

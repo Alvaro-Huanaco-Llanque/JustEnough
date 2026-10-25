@@ -12,4 +12,9 @@ public class LoginRequestDto {
 
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
+
+    // Ignoramos espacios al principio/final para que no falle la validación por un copy-paste
+    public void setEmail(String email) {
+        this.email = email == null ? null : email.trim();
+    }
 }

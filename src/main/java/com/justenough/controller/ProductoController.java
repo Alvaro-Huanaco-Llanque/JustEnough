@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/productos")
-@CrossOrigin(origins = "*") 
 public class ProductoController {
 
     @Autowired
@@ -30,8 +29,6 @@ public class ProductoController {
         } catch (IllegalArgumentException e) {
             // Si no hay stock, devolvemos un error 400 con el mensaje exacto
             return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("{\"message\": \"Error interno del servidor\"}");
         }
     }
 
@@ -42,9 +39,6 @@ public class ProductoController {
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            System.out.println("Error al eliminar el producto: " + e.getMessage());
-            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -53,7 +47,7 @@ public class ProductoController {
         try {
             Producto actualizado = productoService.actualizarStock(id, nuevoStock);
             return ResponseEntity.ok(actualizado);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
         }
     }
@@ -63,7 +57,7 @@ public class ProductoController {
         try {
             Producto actualizado = productoService.actualizarPrecio(id, nuevoPrecio);
             return ResponseEntity.ok(actualizado);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
         }
     }
