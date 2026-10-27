@@ -59,4 +59,8 @@ public class Producto {
     @Column(nullable = false)
     @Builder.Default
     private double costoUnitario = 0.0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean controlaStock = true; // true = va al Repositorio, false = solo Menú/Ventas (hecho en el acto)
 }

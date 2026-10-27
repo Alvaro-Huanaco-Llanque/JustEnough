@@ -32,6 +32,7 @@ public class ProductoRequestDto {
 
     private boolean priorizado;
     private boolean activo = true;
+    private boolean controlaStock = true;
 
     // Stock inicial: solo se usa al crear el producto
     @PositiveOrZero(message = "El stock no puede ser negativo")

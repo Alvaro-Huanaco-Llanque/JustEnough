@@ -120,16 +120,17 @@ public class RegistroDiarioService {
 
             if (cantidadVendida == null || cantidadVendida <= 0) continue;
 
-            Producto producto = productoRepository.findByIdAndComercioId(productoId, comercioId)
+            Producto producto = productoRepository.findById(productoId)
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + productoId));
 
-            if (producto.getStock() < cantidadVendida) {
-                throw new IllegalArgumentException("Stock insuficiente para " + producto.getNombre() + ". Stock actual: " + producto.getStock());
+            // Solo validamos y descontamos stock si es un producto almacenado (no hecho en el acto)
+            if (producto.isControlaStock()) {
+                if (producto.getStock() < cantidadVendida) {
+                    throw new IllegalArgumentException("Stock insuficiente para " + producto.getNombre() + ". Stock actual: " + producto.getStock());
+                }
+                producto.setStock(producto.getStock() - cantidadVendida);
+                productoRepository.save(producto);
             }
-
-            // Descontar stock del inventario
-            producto.setStock(producto.getStock() - cantidadVendida);
-            productoRepository.save(producto);
 
             // Buscar registro diario existente o crear uno nuevo
             RegistroDiario registro = registroDiarioRepository.findByProductoIdAndFecha(productoId, request.getFecha())

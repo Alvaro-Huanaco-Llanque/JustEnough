@@ -53,9 +53,16 @@ public class ProductoService {
         }
 
         Producto producto = new Producto();
-        producto.setComercio(comercio);
-        producto.setStock(dto.getStock());
-        copiarDatosDeCatalogo(dto, producto);
+        producto.setComercio(comercio); // <-- ESTA ES LA LÍNEA CLAVE QUE FALTABA
+        producto.setNombre(dto.getNombre());
+        producto.setUnidadMedida(dto.getUnidadMedida());
+        producto.setPriorizado(dto.isPriorizado());
+        producto.setStock(dto.isControlaStock() ? dto.getStock() : 0.0);
+        producto.setActivo(dto.isActivo());
+        producto.setControlaStock(dto.isControlaStock());
+        if (dto.getPrecioVenta() > 0) {
+            producto.setPrecioVenta(dto.getPrecioVenta());
+        }
 
         Producto productoGuardado = productoRepository.save(producto);
 
