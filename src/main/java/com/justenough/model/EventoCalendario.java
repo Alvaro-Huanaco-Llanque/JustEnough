@@ -2,8 +2,8 @@ package com.justenough.model;
 
 import java.time.LocalDate;
 
+import com.justenough.model.enums.ImpactoEvento;
 import com.justenough.model.enums.TipoEvento;
-// ... resto de los imports
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,4 +43,11 @@ public class EventoCalendario {
 
     @Column(nullable = false)
     private String descripcion;
+
+    // Feriados: inamovible / trasladable / puente. Eventos propios: Feria, Partido, Otro...
+    private String categoria;
+
+    // Solo para eventos propios del comercio
+    @Enumerated(EnumType.STRING)
+    private ImpactoEvento impacto;
 }

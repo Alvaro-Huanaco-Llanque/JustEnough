@@ -1,11 +1,15 @@
 package com.justenough.controller;
 
-import com.justenough.model.EventoCalendario;
-import com.justenough.repository.EventoCalendarioRepository;
+import com.justenough.dto.EventoCalendarioDto;
+import com.justenough.dto.EventoRequestDto;
+import com.justenough.service.EventoCalendarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -13,31 +17,22 @@ import java.util.List;
 public class EventoCalendarioController {
 
     @Autowired
-    private EventoCalendarioRepository eventoCalendarioRepository;
+    private EventoCalendarioService eventoCalendarioService;
 
+    // Feriados, efemérides y eventos propios entre dos fechas (AAAA-MM-DD, inclusive)
     @GetMapping
-    public List<EventoCalendario> listar() {
-        return eventoCalendarioRepository.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<EventoCalendario> buscarPorId(@PathVariable Long id) {
-        return eventoCalendarioRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public List<EventoCalendarioDto> listar(@RequestParam LocalDate desde, @RequestParam LocalDate hasta) {
+        return eventoCalendarioService.listar(desde, hasta);
     }
 
     @PostMapping
-    public EventoCalendario guardar(@RequestBody EventoCalendario evento) {
-        return eventoCalendarioRepository.save(evento);
+    public ResponseEntity<EventoCalendarioDto> crear(@Valid @RequestBody EventoRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventoCalendarioService.crear(dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        if (!eventoCalendarioRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        eventoCalendarioRepository.deleteById(id);
+        eventoCalendarioService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }

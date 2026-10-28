@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +27,9 @@ public class PredictivoService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private EventoCalendarioService eventoCalendarioService;
 
     // URL de tu microservicio de Python
     private final String PYTHON_URL = "http://localhost:8000/api/predecir";
@@ -40,14 +45,22 @@ public class PredictivoService {
                 .filter(r -> r.getProducto().getId().equals(productoId))
                 .collect(Collectors.toList());
 
+        // Días con feriado nacional o evento propio del comercio dentro del historial
+        Set<LocalDate> diasEspeciales = registros.isEmpty() || producto.getComercio() == null
+                ? Set.of()
+                : eventoCalendarioService.fechasConFeriadoOEvento(
+                        producto.getComercio().getId(),
+                        registros.stream().map(RegistroDiario::getFecha).min(LocalDate::compareTo).get(),
+                        registros.stream().map(RegistroDiario::getFecha).max(LocalDate::compareTo).get());
+
         // 3. Mapear los registros a los DTOs que espera Python
-        List<RegistroHistoricoEnvioDto> historialDto = registros.stream().map(r -> 
+        List<RegistroHistoricoEnvioDto> historialDto = registros.stream().map(r ->
             RegistroHistoricoEnvioDto.builder()
                 .fecha(r.getFecha().toString())
                 .cantidadProducida(r.getCantidadProducida())
                 .cantidadVendida(r.getCantidadVendida())
                 .cantidadDesperdiciada(r.getCantidadDesperdiciada() != null ? r.getCantidadDesperdiciada() : 0.0)
-                .esFeriadoOEvento(false) // Aquí puedes cruzar luego con tu tabla de EventoCalendario si la fecha coincide
+                .esFeriadoOEvento(diasEspeciales.contains(r.getFecha()))
                 .build()
         ).collect(Collectors.toList());
 
